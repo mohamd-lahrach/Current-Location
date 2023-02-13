@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Get Current Location</string>
+    <string name="city">Local : </string>
+    <string name="country">Country : </string>
+    <string name="address">Address : </string>
+    <string name="longitude">Longitude :</string>
+    <string name="latitude">Latitude :</string>
 </resources>

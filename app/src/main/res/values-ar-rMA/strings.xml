@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">الموقع الحالي</string>
+    <string name="city">الموقع : </string>
+    <string name="country">الدولة : </string>
+    <string name="address">العنوان : </string>
+    <string name="longitude">خط الطول : </string>
+    <string name="latitude">خط العرض : </string>
+</resources>

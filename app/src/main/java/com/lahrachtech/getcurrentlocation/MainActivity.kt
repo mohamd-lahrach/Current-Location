@@ -1,11 +1,7 @@
 package com.lahrachtech.getcurrentlocation
 
-import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -20,46 +17,38 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     val TAG = "MainActivityGPS"
     val MY_PERMISSIONS_REQUEST_LOCATION = 1
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        button.setOnClickListener {
-            requestPermission()
 
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, object :
-                    LocationListener {
-                    override fun onLocationChanged(location: Location) {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
-                        val geocoder = Geocoder(this@MainActivity, Locale.getDefault())
-                        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        button.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        val geocoder = Geocoder(this, Locale.getDefault())
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        val address = addresses?.get(0)?.getAddressLine(0)
                         val city = addresses?.get(0)?.locality
                         val country = addresses?.get(0)?.countryName
-                        val address = addresses?.get(0)?.getAddressLine(0)
-                        val message = "Current location: $address, $city, $country"
-//                        Log.d(TAG, message)
-                        Log.d(TAG, "city $city")
-                        Log.d(TAG, "country $country")
+                        val latitude = addresses?.get(0)?.latitude
+                        val longitude = addresses?.get(0)?.longitude
+                        Log.d("Location", "Address: $address, City: $city, Country: $country")
                         Log.d(TAG, "address $address")
-                        locationManager.removeUpdates(this)
+                        tvCity2.text = "$city"
+                        tvCountry2.text = "$country"
+                        tvAdress2.text = "$address"
+                        tvLatitude.text = "$latitude"
+                        tvLongitude.text = "$longitude"
+                    } else {
+                        Log.d("Location", "Could not get current location")
                     }
-
-                    override fun onProviderEnabled(provider: String) {}
-
-                    override fun onProviderDisabled(provider: String) {}
-
-                    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-                })
+                }
+            } else {
+                requestPermission()
             }
         }
-
-
     }
 
     private fun requestPermission() {
